@@ -39,6 +39,7 @@ textarea{min-height:150px;resize:vertical}
 .presets button{border:1px solid var(--border);background:transparent;color:var(--fg);
   padding:6px 12px;border-radius:999px;cursor:pointer;font-size:.88rem}
 .presets button:hover{border-color:var(--accent);color:var(--accent)}
+.presets button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .result{margin-top:20px;display:none}
 .result.show{display:block}
 .preview{width:100%;max-height:340px;object-fit:contain;border-radius:10px;border:1px solid var(--border);background:#0002}

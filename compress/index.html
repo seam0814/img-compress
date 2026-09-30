@@ -51,6 +51,8 @@
   var $=function(s){return document.querySelector(s)};
   var drop=$("#drop"),fileInput=$("#file"),targetIn=$("#target"),fmtIn=$("#format"),busy=$("#busy"),err=$("#err"),result=$("#result"),preview=$("#preview"),dl=$("#dl"),meta=$("#meta"),sOrig=$("#sOrig"),sNew=$("#sNew"),sCut=$("#sCut");
   var lastFile=null,lastUrl=null;
+  targetIn.value=store.get("cmp_kb",targetIn.value);fmtIn.value=store.get("cmp_fmt",fmtIn.value);
+  dl.addEventListener("click",function(){track("download",{tool:"compress"})});
   var fmtKB=function(b){return b>=1048576?(b/1048576).toFixed(2)+" MB":Math.round(b/1024)+" KB"};
   function showErr(m){err.textContent=m;err.classList.add("show");busy.classList.remove("show")}
   drop.addEventListener("click",function(){fileInput.click()});
@@ -60,8 +62,8 @@
   drop.addEventListener("drop",function(e){var f=e.dataTransfer.files[0];if(f)start(f)});
   window.addEventListener("paste",function(e){var items=(e.clipboardData||{}).items||[];for(var i=0;i<items.length;i++){if(items[i].type.indexOf("image/")===0){start(items[i].getAsFile());break}}});
   $("#presets").addEventListener("click",function(e){var kb=e.target.getAttribute("data-kb");if(kb){targetIn.value=kb;if(lastFile)start(lastFile)}});
-  targetIn.addEventListener("change",function(){if(lastFile)start(lastFile)});
-  fmtIn.addEventListener("change",function(){if(lastFile)start(lastFile)});
+  targetIn.addEventListener("change",function(){store.set("cmp_kb",targetIn.value);if(lastFile)start(lastFile)});
+  fmtIn.addEventListener("change",function(){store.set("cmp_fmt",fmtIn.value);if(lastFile)start(lastFile)});
   function toBlob(c,m,q){return new Promise(function(res){c.toBlob(function(b){res(b)},m,q)})}
   async function compress(bmp,target,mime){
     var scales=[1,.85,.72,.6,.5,.42,.35,.28,.22,.16,.12],best=null,bS=1,bQ=0,canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");
@@ -78,7 +80,7 @@
     err.classList.remove("show");result.classList.remove("show");
     if(file.type.indexOf("image/")!==0){showErr("이미지 파일만 올릴 수 있어요.");return}
     var t=parseFloat(targetIn.value);if(!(t>0)){showErr("목표 용량을 숫자로 입력하세요.");return}
-    lastFile=file;busy.classList.add("show");
+    lastFile=file;busy.classList.add("show");track("upload",{tool:"compress"});
     try{var bmp=await createImageBitmap(file),mime=fmtIn.value,out=await compress(bmp,t*1024,mime);if(bmp.close)bmp.close();
       if(!out.blob){showErr("압축 실패. 다른 이미지를 시도하세요.");return}
       if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(out.blob);preview.src=lastUrl;

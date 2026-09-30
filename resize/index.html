@@ -57,6 +57,7 @@
   var drop=$("#drop"),fileInput=$("#file"),mode=$("#mode"),wIn=$("#w"),hIn=$("#h"),pct=$("#pct"),ratio=$("#ratio"),busy=$("#busy"),err=$("#err"),result=$("#result"),preview=$("#preview"),dl=$("#dl"),sDim=$("#sDim"),sOrigDim=$("#sOrigDim"),sSize=$("#sSize");
   var wField=$("#wField"),hField=$("#hField"),pField=$("#pField");
   var img=null,natW=0,natH=0,lastUrl=null,origName="image";
+  dl.addEventListener("click",function(){track("download",{tool:"resize"})});
   var fmtKB=function(b){return b>=1048576?(b/1048576).toFixed(2)+" MB":Math.round(b/1024)+" KB"};
   function showErr(m){err.textContent=m;err.classList.add("show");busy.classList.remove("show")}
   drop.addEventListener("click",function(){fileInput.click()});
@@ -73,7 +74,7 @@
   [wIn,hIn,pct,ratio].forEach(function(el){el.addEventListener("input",function(){if(ratio.checked&&natW&&this!==pct){if(this===wIn)hIn.value=Math.round(wIn.value*natH/natW)||"";else wIn.value=Math.round(hIn.value*natW/natH)||""}render()})});
   function load(file){
     if(file.type.indexOf("image/")!==0){showErr("이미지 파일만 올릴 수 있어요.");return}
-    origName=(file.name.replace(/\.[^.]+$/,"")||"image");
+    origName=(file.name.replace(/\.[^.]+$/,"")||"image");track("upload",{tool:"resize"});
     var u=URL.createObjectURL(file);img=new Image();img.onload=function(){natW=img.naturalWidth;natH=img.naturalHeight;wIn.value=natW;hIn.value=natH;URL.revokeObjectURL(u);render()};img.onerror=function(){showErr("이미지를 읽지 못했어요.")};img.src=u}
   function render(){
     if(!img)return;err.classList.remove("show");

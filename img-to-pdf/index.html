@@ -40,6 +40,7 @@
   var $=function(s){return document.querySelector(s)};
   var drop=$("#drop"),fileInput=$("#file"),list=$("#list"),busy=$("#busy"),err=$("#err"),result=$("#result"),dl=$("#dl"),sPages=$("#sPages"),sSize=$("#sSize"),sImgs=$("#sImgs");
   var lastUrl=null;var fmtKB=function(b){return b>=1048576?(b/1048576).toFixed(2)+" MB":Math.round(b/1024)+" KB"};
+  dl.addEventListener("click",function(){track("download",{tool:"img-to-pdf"})});
   function showErr(m){err.textContent=m;err.classList.add("show");busy.classList.remove("show")}
   drop.addEventListener("click",function(){fileInput.click()});
   fileInput.addEventListener("change",function(e){build(e.target.files)});
@@ -55,7 +56,7 @@
     err.classList.remove("show");result.classList.remove("show");
     if(!files.length){showErr("이미지 파일을 선택하세요.");return}
     list.textContent=files.length+"장 선택됨: "+files.map(function(f){return f.name}).join(", ");
-    busy.classList.add("show");
+    busy.classList.add("show");track("upload",{tool:"img-to-pdf",count:files.length});
     try{
       var doc=await PDFLib.PDFDocument.create();
       for(var i=0;i<files.length;i++){var p=await imgToPng(files[i]);var png=await doc.embedPng(p.bytes);

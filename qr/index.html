@@ -14,7 +14,14 @@
   <h1>QR 코드 생성</h1>
   <p class="sub">링크나 텍스트를 QR 코드로 만들고 PNG로 저장하세요. 브라우저에서 바로 생성됩니다.</p>
   <div class="tool">
-    <div class="field"><label for="txt">내용 (URL 또는 텍스트)</label><input id="txt" type="text" placeholder="https://example.com" value="https://seam0814.github.io/img-compress/"></div>
+    <label>빠른 시작 · 누르고 내용만 수정</label>
+    <div class="presets" id="tpl">
+      <button data-v="https://">🔗 URL</button>
+      <button data-v="tel:010-1234-5678">📞 전화</button>
+      <button data-v="SMSTO:010-1234-5678:">💬 문자</button>
+      <button data-v="mailto:hello@example.com">✉️ 이메일</button>
+    </div>
+    <div class="field" style="margin-top:12px"><label for="txt">내용 (URL 또는 텍스트)</label><input id="txt" type="text" placeholder="https://example.com" value="https://seam0814.github.io/img-compress/"></div>
     <div class="controls">
       <div class="field"><label for="size">크기 (px)</label><select id="size"><option>200</option><option selected>300</option><option>500</option><option>800</option></select></div>
     </div>
@@ -35,7 +42,10 @@
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)};
-  var txt=$("#txt"),size=$("#size"),box=$("#qr"),dl=$("#dl"),err=$("#err"),qr=null;
+  var txt=$("#txt"),size=$("#size"),box=$("#qr"),dl=$("#dl"),err=$("#err"),tpl=$("#tpl"),qr=null;
+  size.value=store.get("qr_size",size.value);
+  dl.addEventListener("click",function(){track("download",{tool:"qr"})});
+  tpl.addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;txt.value=b.getAttribute("data-v");render();txt.focus()});
   function render(){
     err.classList.remove("show");box.innerHTML="";
     var v=txt.value.trim();if(!v){err.textContent="내용을 입력하세요.";err.classList.add("show");return}
@@ -44,7 +54,7 @@
       setTimeout(function(){var c=box.querySelector("canvas"),img=box.querySelector("img");
         var data=c?c.toDataURL("image/png"):(img?img.src:null);if(data)dl.href=data},60);
     }catch(e){err.textContent="생성 실패";err.classList.add("show")}}
-  txt.addEventListener("input",render);size.addEventListener("change",render);render();
+  txt.addEventListener("input",render);size.addEventListener("change",function(){store.set("qr_size",size.value);render()});render();
 })();
 </script>
 </body>
