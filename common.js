@@ -2,10 +2,10 @@
 (function(){
   var ROOT = window.SITE_ROOT || "./";
   var TOOLS = [
-    {path:"compress/",   ic:"🗜️", title:"이미지 용량 줄이기", desc:"원하는 KB로 압축",        cat:"이미지"},
-    {path:"resize/",     ic:"📐", title:"이미지 크기 변경",   desc:"픽셀·퍼센트로 리사이즈",  cat:"이미지"},
+    {path:"compress/",   ic:"🗜️", title:"이미지 용량 줄이기", desc:"원하는 KB로 압축",        cat:"이미지", pop:true},
+    {path:"resize/",     ic:"📐", title:"이미지 크기 변경",   desc:"픽셀·퍼센트로 리사이즈",  cat:"이미지", pop:true},
     {path:"convert/",    ic:"🔄", title:"이미지 형식 변환",   desc:"PNG · JPG · WebP",         cat:"이미지"},
-    {path:"img-to-pdf/", ic:"📄", title:"이미지 → PDF",       desc:"여러 장을 PDF 한 개로",   cat:"PDF"},
+    {path:"img-to-pdf/", ic:"📄", title:"이미지 → PDF",       desc:"여러 장을 PDF 한 개로",   cat:"PDF", pop:true},
     {path:"word-count/", ic:"🔢", title:"글자 수 세기",       desc:"글자·단어·공백 카운트",   cat:"텍스트"},
     {path:"qr/",         ic:"▦",  title:"QR 코드 생성",       desc:"링크·텍스트 → QR 이미지", cat:"개발"}
   ];
@@ -32,13 +32,19 @@
   // 허브 그리드 렌더 (홈에서만)
   var grid=document.getElementById("tools");
   if(grid){
+    function card(t){return '<a class="toolcard" href="'+ROOT+t.path+'">'+(t.pop?'<span class="pop">인기</span>':'')+'<span class="ic">'+t.ic+'</span><b>'+t.title+'</b><small>'+t.desc+'</small></a>';}
+    var pops=TOOLS.filter(function(t){return t.pop;});
+    if(pops.length){
+      grid.appendChild(h('<div class="cat">🔥 인기 도구</div>'));
+      var pg=h('<div class="grid"></div>');
+      pops.forEach(function(t){pg.appendChild(h(card(t)));});
+      grid.appendChild(pg);
+    }
     var cats=[]; TOOLS.forEach(function(t){if(cats.indexOf(t.cat)<0)cats.push(t.cat);});
     cats.forEach(function(c){
       grid.appendChild(h('<div class="cat">'+c+'</div>'));
       var g=h('<div class="grid"></div>');
-      TOOLS.filter(function(t){return t.cat===c;}).forEach(function(t){
-        g.appendChild(h('<a class="toolcard" href="'+ROOT+t.path+'"><span class="ic">'+t.ic+'</span><b>'+t.title+'</b><small>'+t.desc+'</small></a>'));
-      });
+      TOOLS.filter(function(t){return t.cat===c;}).forEach(function(t){ g.appendChild(h(card(t))); });
       grid.appendChild(g);
     });
   }

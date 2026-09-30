@@ -22,6 +22,16 @@
       <div class="field" id="pField" style="display:none"><label for="pct">배율 (%)</label><input id="pct" type="number" min="1" value="50"></div>
     </div>
     <div class="controls" style="margin-top:8px"><label style="display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--fg)"><input type="checkbox" id="ratio" checked style="width:auto"> 가로세로 비율 유지</label></div>
+    <label style="margin-top:14px">자주 쓰는 크기 · 한 번만 누르세요</label>
+    <div class="presets" id="presets">
+      <button data-w="1080" data-h="1080">인스타 정사각형 1:1</button>
+      <button data-w="1080" data-h="1920">인스타 스토리 9:16</button>
+      <button data-w="1280" data-h="720">유튜브 썸네일 16:9</button>
+      <button data-w="1920" data-h="1080">FHD 16:9 (1920×1080)</button>
+      <button data-w="512" data-h="512">프로필 512</button>
+      <button data-pct="50">50%</button>
+      <button data-pct="25">25%</button>
+    </div>
     <div class="busy" id="busy">처리 중…</div>
     <div class="err" id="err"></div>
     <div class="result" id="result">
@@ -54,7 +64,12 @@
   ["dragenter","dragover"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add("drag")})});
   ["dragleave","drop"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove("drag")})});
   drop.addEventListener("drop",function(e){var f=e.dataTransfer.files[0];if(f)load(f)});
-  mode.addEventListener("change",function(){var px=mode.value==="px";wField.style.display=hField.style.display=px?"":"none";pField.style.display=px?"none":"";render()});
+  function toggleFields(){var px=mode.value==="px";wField.style.display=hField.style.display=px?"":"none";pField.style.display=px?"none":""}
+  mode.addEventListener("change",function(){toggleFields();render()});
+  document.getElementById("presets").addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;
+    if(b.getAttribute("data-pct")){mode.value="pct";toggleFields();pct.value=b.getAttribute("data-pct")}
+    else{mode.value="px";toggleFields();wIn.value=b.getAttribute("data-w");hIn.value=b.getAttribute("data-h")}
+    render()});
   [wIn,hIn,pct,ratio].forEach(function(el){el.addEventListener("input",function(){if(ratio.checked&&natW&&this!==pct){if(this===wIn)hIn.value=Math.round(wIn.value*natH/natW)||"";else wIn.value=Math.round(hIn.value*natW/natH)||""}render()})});
   function load(file){
     if(file.type.indexOf("image/")!==0){showErr("이미지 파일만 올릴 수 있어요.");return}

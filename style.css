@@ -64,8 +64,10 @@ details p{color:var(--muted);margin:.6em 0 0}
 /* hub */
 .hero{padding:8px 0 6px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:8px}
-.toolcard{display:block;text-decoration:none;color:var(--fg);background:var(--card);
+.toolcard{position:relative;display:block;text-decoration:none;color:var(--fg);background:var(--card);
   border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:.15s}
+.pop{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;
+  font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:999px;letter-spacing:.02em}
 .toolcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .toolcard .ic{font-size:1.5rem}
 .toolcard b{display:block;margin:8px 0 3px}
