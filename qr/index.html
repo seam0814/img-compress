@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR 코드 생성 — 링크·텍스트를 QR 이미지로 (무료)</title>
+<meta name="description" content="URL이나 텍스트를 QR 코드 이미지로 무료 생성하고 PNG로 다운로드. 업로드·회원가입 없이 브라우저에서 바로 생성.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/qr/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>QR 코드 생성</h1>
+  <p class="sub">링크나 텍스트를 QR 코드로 만들고 PNG로 저장하세요. 브라우저에서 바로 생성됩니다.</p>
+  <div class="tool">
+    <div class="field"><label for="txt">내용 (URL 또는 텍스트)</label><input id="txt" type="text" placeholder="https://example.com" value="https://seam0814.github.io/img-compress/"></div>
+    <div class="controls">
+      <div class="field"><label for="size">크기 (px)</label><select id="size"><option>200</option><option selected>300</option><option>500</option><option>800</option></select></div>
+    </div>
+    <div style="text-align:center;margin-top:18px"><div id="qr" style="display:inline-block;background:#fff;padding:12px;border-radius:12px"></div></div>
+    <a id="dl" class="btn" download="qr.png" style="margin-top:16px">PNG 다운로드</a>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="copy">
+    <h2>안내</h2>
+    <p>QR 코드는 브라우저에서 생성되며 입력 내용은 서버로 전송되지 않습니다. 만든 QR은 명함·포스터·전단지 등에 자유롭게 사용할 수 있습니다.</p>
+    <details><summary>스캔이 안 돼요.</summary><p>내용이 너무 길면 QR이 복잡해져 인식이 어려울 수 있어요. 긴 URL은 단축 링크를 쓰고, 인쇄 시 충분히 크게 출력하세요.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var txt=$("#txt"),size=$("#size"),box=$("#qr"),dl=$("#dl"),err=$("#err"),qr=null;
+  function render(){
+    err.classList.remove("show");box.innerHTML="";
+    var v=txt.value.trim();if(!v){err.textContent="내용을 입력하세요.";err.classList.add("show");return}
+    var s=parseInt(size.value);
+    try{qr=new QRCode(box,{text:v,width:s,height:s,correctLevel:QRCode.CorrectLevel.M});
+      setTimeout(function(){var c=box.querySelector("canvas"),img=box.querySelector("img");
+        var data=c?c.toDataURL("image/png"):(img?img.src:null);if(data)dl.href=data},60);
+    }catch(e){err.textContent="생성 실패";err.classList.add("show")}}
+  txt.addEventListener("input",render);size.addEventListener("change",render);render();
+})();
+</script>
+</body>
+</html>

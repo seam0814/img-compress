@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>글자 수 세기 — 글자·단어·공백 카운트 (무료)</title>
+<meta name="description" content="글자 수, 공백 제외 글자 수, 단어 수, 줄 수, 바이트를 실시간으로 세는 무료 도구. 자기소개서·리포트 글자 수 제한 확인에 딱. 브라우저에서 바로 처리.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/word-count/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>글자 수 세기</h1>
+  <p class="sub">글자·단어·줄·바이트를 실시간으로 셉니다. 자기소개서·리포트 글자 수 제한 확인에 유용해요.</p>
+  <div class="tool">
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat win"><b id="cChar">0</b><span>글자 수</span></div>
+      <div class="stat"><b id="cNoSpace">0</b><span>공백 제외</span></div>
+      <div class="stat"><b id="cWord">0</b><span>단어</span></div>
+      <div class="stat"><b id="cLine">0</b><span>줄</span></div>
+      <div class="stat"><b id="cByte">0</b><span>바이트(UTF-8)</span></div>
+      <div class="stat"><b id="cNoBlank">0</b><span>공백·줄바꿈 제외</span></div>
+    </div>
+    <textarea id="ta" placeholder="여기에 텍스트를 입력하거나 붙여넣으세요…" style="margin-top:14px"></textarea>
+    <div class="presets" style="margin-top:10px"><button id="clear">지우기</button><button id="copy">복사</button></div>
+  </div>
+  <div class="copy">
+    <h2>안내</h2>
+    <p>모든 계산은 브라우저에서 이루어지며 입력한 내용은 어디에도 전송되지 않습니다. "글자 수"는 공백·줄바꿈을 포함하며, "공백 제외"는 스페이스만 제외, "공백·줄바꿈 제외"는 모든 공백문자를 제외합니다.</p>
+    <details><summary>단어 수는 어떻게 세나요?</summary><p>공백으로 구분된 덩어리를 1단어로 셉니다. 한국어처럼 띄어쓰기가 적은 글은 어절 기준이 됩니다.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)},ta=$("#ta");
+  var enc=new TextEncoder();
+  function upd(){var t=ta.value;
+    $("#cChar").textContent=t.length;
+    $("#cNoSpace").textContent=t.replace(/ /g,"").length;
+    $("#cNoBlank").textContent=t.replace(/\s/g,"").length;
+    var w=t.trim().length?t.trim().split(/\s+/).length:0;$("#cWord").textContent=w;
+    $("#cLine").textContent=t.length?t.split(/\n/).length:0;
+    $("#cByte").textContent=enc.encode(t).length}
+  ta.addEventListener("input",upd);
+  $("#clear").addEventListener("click",function(){ta.value="";upd();ta.focus()});
+  $("#copy").addEventListener("click",function(){ta.select();try{document.execCommand("copy")}catch(e){}
+    if(navigator.clipboard)navigator.clipboard.writeText(ta.value)});
+  upd();
+})();
+</script>
+</body>
+</html>

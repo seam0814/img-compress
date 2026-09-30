@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 용량 줄이기 — 원하는 KB로 압축 (무료·업로드 없음)</title>
+<meta name="description" content="이미지를 원하는 용량(KB)으로 무료 압축. JPG·PNG·WebP 지원. 업로드 없이 브라우저에서 바로 처리. 이력서 사진·첨부 용량 제한에 딱.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/compress/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>이미지 용량 줄이기</h1>
+  <p class="sub">원하는 용량(KB)으로 이미지를 압축하세요. 업로드 없이 브라우저에서 바로 처리 — 파일은 어디에도 전송되지 않습니다.</p>
+  <div class="tool">
+    <div id="drop" class="drop">
+      <strong>이미지를 끌어다 놓거나 눌러서 선택</strong>
+      <small>JPG · PNG · WebP · 한 장씩</small>
+      <input id="file" type="file" accept="image/*" hidden>
+    </div>
+    <div class="controls">
+      <div class="field"><label for="target">목표 용량 (KB)</label><input id="target" type="number" min="5" step="5" value="200"></div>
+      <div class="field"><label for="format">출력 형식</label><select id="format">
+        <option value="image/jpeg">JPG (호환성 최고)</option><option value="image/webp">WebP (더 작게)</option></select></div>
+    </div>
+    <div class="presets" id="presets"><button data-kb="100">100KB</button><button data-kb="200">200KB</button><button data-kb="500">500KB</button><button data-kb="1024">1MB</button></div>
+    <div class="busy" id="busy">압축 중…</div>
+    <div class="err" id="err"></div>
+    <div class="result" id="result">
+      <img id="preview" class="preview" alt="압축 결과">
+      <div class="stats"><div class="stat"><b id="sOrig">–</b><span>원본</span></div><div class="stat win"><b id="sNew">–</b><span>압축 후</span></div><div class="stat"><b id="sCut">–</b><span>절감</span></div></div>
+      <a id="dl" class="btn" download>다운로드</a>
+      <p class="note" id="meta"></p>
+    </div>
+  </div>
+  <div class="copy">
+    <h2>사용법</h2>
+    <p>이미지를 올리고 → 목표 용량을 KB로 입력 → 다운로드. 화질을 자동 조절해 목표 이하로 맞추고, 목표가 너무 작으면 가로·세로 크기까지 자동 축소합니다.</p>
+    <h2>자주 묻는 질문</h2>
+    <details><summary>사진이 서버에 올라가나요?</summary><p>아니요. 압축은 전부 브라우저에서 처리되며 이미지는 전송되지 않습니다.</p></details>
+    <details><summary>원하는 용량보다 크게 나와요.</summary><p>매우 작은 목표는 화질을 최저로 낮춰도 넘을 수 있어, 이때 이미지 크기를 자동 축소해 맞춥니다. 그래도 부족하면 목표를 조금 높이세요.</p></details>
+    <details><summary>투명 배경이 유지되나요?</summary><p>JPG는 투명 영역이 흰색이 됩니다. 투명도를 유지하려면 WebP를 선택하세요.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var drop=$("#drop"),fileInput=$("#file"),targetIn=$("#target"),fmtIn=$("#format"),busy=$("#busy"),err=$("#err"),result=$("#result"),preview=$("#preview"),dl=$("#dl"),meta=$("#meta"),sOrig=$("#sOrig"),sNew=$("#sNew"),sCut=$("#sCut");
+  var lastFile=null,lastUrl=null;
+  var fmtKB=function(b){return b>=1048576?(b/1048576).toFixed(2)+" MB":Math.round(b/1024)+" KB"};
+  function showErr(m){err.textContent=m;err.classList.add("show");busy.classList.remove("show")}
+  drop.addEventListener("click",function(){fileInput.click()});
+  fileInput.addEventListener("change",function(e){if(e.target.files[0])start(e.target.files[0])});
+  ["dragenter","dragover"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add("drag")})});
+  ["dragleave","drop"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove("drag")})});
+  drop.addEventListener("drop",function(e){var f=e.dataTransfer.files[0];if(f)start(f)});
+  window.addEventListener("paste",function(e){var items=(e.clipboardData||{}).items||[];for(var i=0;i<items.length;i++){if(items[i].type.indexOf("image/")===0){start(items[i].getAsFile());break}}});
+  $("#presets").addEventListener("click",function(e){var kb=e.target.getAttribute("data-kb");if(kb){targetIn.value=kb;if(lastFile)start(lastFile)}});
+  targetIn.addEventListener("change",function(){if(lastFile)start(lastFile)});
+  fmtIn.addEventListener("change",function(){if(lastFile)start(lastFile)});
+  function toBlob(c,m,q){return new Promise(function(res){c.toBlob(function(b){res(b)},m,q)})}
+  async function compress(bmp,target,mime){
+    var scales=[1,.85,.72,.6,.5,.42,.35,.28,.22,.16,.12],best=null,bS=1,bQ=0,canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");
+    for(var s=0;s<scales.length;s++){var sc=scales[s];canvas.width=Math.max(1,Math.round(bmp.width*sc));canvas.height=Math.max(1,Math.round(bmp.height*sc));
+      if(mime==="image/jpeg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height)}
+      ctx.drawImage(bmp,0,0,canvas.width,canvas.height);
+      var lo=.05,hi=.96,fit=null,fq=0;
+      for(var i=0;i<8;i++){var q=(lo+hi)/2,blob=await toBlob(canvas,mime,q);if(!blob){hi=q;continue}
+        if(blob.size<=target){fit=blob;fq=q;lo=q}else hi=q;
+        if(!best||blob.size<best.size){best=blob;bS=sc;bQ=q}}
+      if(fit)return{blob:fit,quality:fq,w:canvas.width,h:canvas.height,hit:true}}
+    return{blob:best,quality:bQ,w:Math.round(bmp.width*bS),h:Math.round(bmp.height*bS),hit:false}}
+  async function start(file){
+    err.classList.remove("show");result.classList.remove("show");
+    if(file.type.indexOf("image/")!==0){showErr("이미지 파일만 올릴 수 있어요.");return}
+    var t=parseFloat(targetIn.value);if(!(t>0)){showErr("목표 용량을 숫자로 입력하세요.");return}
+    lastFile=file;busy.classList.add("show");
+    try{var bmp=await createImageBitmap(file),mime=fmtIn.value,out=await compress(bmp,t*1024,mime);if(bmp.close)bmp.close();
+      if(!out.blob){showErr("압축 실패. 다른 이미지를 시도하세요.");return}
+      if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(out.blob);preview.src=lastUrl;
+      var ext=mime==="image/webp"?"webp":"jpg",base=(file.name.replace(/\.[^.]+$/,"")||"image");
+      dl.href=lastUrl;dl.download=base+"_compressed."+ext;
+      sOrig.textContent=fmtKB(file.size);sNew.textContent=fmtKB(out.blob.size);
+      sCut.textContent=Math.max(0,Math.round((1-out.blob.size/file.size)*100))+"%";
+      meta.textContent=out.w+"×"+out.h+"px · 화질 "+Math.round(out.quality*100)+"% · "+ext.toUpperCase()+(out.hit?"":" · ⚠ 목표까지 못 줄임(최소)");
+      busy.classList.remove("show");result.classList.add("show");
+    }catch(ex){showErr("이미지를 읽지 못했어요. 지원하지 않는 형식일 수 있어요.");console.error(ex)}}
+})();
+</script>
+</body>
+</html>

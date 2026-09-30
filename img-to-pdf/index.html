@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지를 PDF로 — 여러 장 JPG·PNG를 PDF 하나로 (무료·업로드 없음)</title>
+<meta name="description" content="여러 장의 이미지(JPG·PNG·WebP)를 PDF 한 개로 무료 변환. 업로드 없이 브라우저에서 바로 처리. 순서대로 페이지 생성.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/img-to-pdf/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>이미지 → PDF</h1>
+  <p class="sub">여러 장의 이미지를 한 개의 PDF로 묶으세요. 업로드 없이 브라우저에서 바로 처리됩니다.</p>
+  <div class="tool">
+    <div id="drop" class="drop"><strong>이미지 여러 장을 끌어다 놓거나 눌러서 선택</strong><small>JPG · PNG · WebP · 선택 순서대로 페이지가 됩니다</small><input id="file" type="file" accept="image/*" multiple hidden></div>
+    <div id="list" class="note" style="text-align:left"></div>
+    <div class="busy" id="busy">PDF 만드는 중…</div>
+    <div class="err" id="err"></div>
+    <div class="result" id="result">
+      <div class="stats"><div class="stat"><b id="sPages">–</b><span>페이지</span></div><div class="stat win"><b id="sSize">–</b><span>PDF 용량</span></div><div class="stat"><b id="sImgs">–</b><span>이미지</span></div></div>
+      <a id="dl" class="btn" download="images.pdf">PDF 다운로드</a>
+    </div>
+  </div>
+  <div class="copy">
+    <h2>사용법</h2>
+    <p>이미지 여러 장을 한 번에 선택하면 고른 순서대로 PDF 페이지가 만들어집니다. 각 페이지는 이미지 비율에 맞춰 생성됩니다.</p>
+    <h2>자주 묻는 질문</h2>
+    <details><summary>이미지가 서버에 올라가나요?</summary><p>아니요. PDF 생성은 전부 브라우저에서 처리되며 이미지는 전송되지 않습니다.</p></details>
+    <details><summary>페이지 순서를 바꾸려면?</summary><p>파일 선택 시 원하는 순서대로 고르면 그 순서로 페이지가 만들어집니다.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var drop=$("#drop"),fileInput=$("#file"),list=$("#list"),busy=$("#busy"),err=$("#err"),result=$("#result"),dl=$("#dl"),sPages=$("#sPages"),sSize=$("#sSize"),sImgs=$("#sImgs");
+  var lastUrl=null;var fmtKB=function(b){return b>=1048576?(b/1048576).toFixed(2)+" MB":Math.round(b/1024)+" KB"};
+  function showErr(m){err.textContent=m;err.classList.add("show");busy.classList.remove("show")}
+  drop.addEventListener("click",function(){fileInput.click()});
+  fileInput.addEventListener("change",function(e){build(e.target.files)});
+  ["dragenter","dragover"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add("drag")})});
+  ["dragleave","drop"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove("drag")})});
+  drop.addEventListener("drop",function(e){e.preventDefault();build(e.dataTransfer.files)});
+  function imgToPng(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();
+    im.onload=function(){var c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);URL.revokeObjectURL(u);
+      c.toBlob(function(b){b.arrayBuffer().then(function(ab){res({bytes:new Uint8Array(ab),w:c.width,h:c.height})})},"image/png")};
+    im.onerror=function(){URL.revokeObjectURL(u);rej()};im.src=u})}
+  async function build(files){
+    files=[].slice.call(files).filter(function(f){return f.type.indexOf("image/")===0});
+    err.classList.remove("show");result.classList.remove("show");
+    if(!files.length){showErr("이미지 파일을 선택하세요.");return}
+    list.textContent=files.length+"장 선택됨: "+files.map(function(f){return f.name}).join(", ");
+    busy.classList.add("show");
+    try{
+      var doc=await PDFLib.PDFDocument.create();
+      for(var i=0;i<files.length;i++){var p=await imgToPng(files[i]);var png=await doc.embedPng(p.bytes);
+        var page=doc.addPage([p.w,p.h]);page.drawImage(png,{x:0,y:0,width:p.w,height:p.h})}
+      var bytes=await doc.save();var blob=new Blob([bytes],{type:"application/pdf"});
+      if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(blob);dl.href=lastUrl;
+      sPages.textContent=files.length;sImgs.textContent=files.length;sSize.textContent=fmtKB(blob.size);
+      busy.classList.remove("show");result.classList.add("show");
+    }catch(ex){showErr("PDF 생성에 실패했어요. 다른 이미지를 시도하세요.");console.error(ex)}}
+})();
+</script>
+</body>
+</html>

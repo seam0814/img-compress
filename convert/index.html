@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 형식 변환 — PNG · JPG · WebP (무료·업로드 없음)</title>
+<meta name="description" content="이미지를 PNG, JPG, WebP로 서로 무료 변환. 업로드 없이 브라우저에서 바로 처리. PNG를 JPG로, WebP를 PNG로 등.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/convert/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>이미지 형식 변환</h1>
+  <p class="sub">PNG · JPG · WebP 사이를 변환하세요. 업로드 없이 브라우저에서 바로 처리됩니다.</p>
+  <div class="tool">
+    <div id="drop" class="drop"><strong>이미지를 끌어다 놓거나 눌러서 선택</strong><small>PNG · JPG · WebP · GIF 등</small><input id="file" type="file" accept="image/*" hidden></div>
+    <div class="controls">
+      <div class="field"><label for="format">변환할 형식</label><select id="format"><option value="image/png">PNG (무손실·투명)</option><option value="image/jpeg">JPG (사진·작은 용량)</option><option value="image/webp">WebP (최신·가장 작음)</option></select></div>
+      <div class="field" id="qField"><label for="q">화질 (JPG·WebP)</label><input id="q" type="range" min="10" max="100" value="90"><small class="note" id="qv" style="margin:2px 0 0">90%</small></div>
+    </div>
+    <div class="busy" id="busy">변환 중…</div>
+    <div class="err" id="err"></div>
+    <div class="result" id="result">
+      <img id="preview" class="preview" alt="변환 결과">
+      <div class="stats"><div class="stat"><b id="sFrom">–</b><span>원본</span></div><div class="stat win"><b id="sTo">–</b><span>변환 후</span></div><div class="stat"><b id="sSize">–</b><span>용량</span></div></div>
+      <a id="dl" class="btn" download>다운로드</a>
+    </div>
+  </div>
+  <div class="copy">
+    <h2>사용법</h2>
+    <p>이미지를 올리고 → 변환할 형식을 고르면 바로 변환됩니다. 투명 배경이 필요하면 PNG나 WebP, 사진을 작게 만들려면 JPG나 WebP를 선택하세요.</p>
+    <h2>자주 묻는 질문</h2>
+    <details><summary>PNG를 JPG로 바꾸면 투명 배경은요?</summary><p>JPG는 투명도를 지원하지 않아 투명 영역이 흰색으로 채워집니다. 투명도를 지키려면 PNG나 WebP로 변환하세요.</p></details>
+    <details><summary>HEIC(아이폰 사진)도 되나요?</summary><p>브라우저가 HEIC를 지원하는 경우에만 가능합니다. 이 도구는 표준 웹 형식(PNG·JPG·WebP)에 최적화돼 있습니다.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var drop=$("#drop"),fileInput=$("#file"),fmtIn=$("#format"),qIn=$("#q"),qv=$("#qv"),qField=$("#qField"),busy=$("#busy"),err=$("#err"),result=$("#result"),preview=$("#preview"),dl=$("#dl"),sFrom=$("#sFrom"),sTo=$("#sTo"),sSize=$("#sSize");
+  var img=null,origName="image",origType="",lastUrl=null;
+  var fmtKB=function(b){return b>=1048576?(b/1048576).toFixed(2)+" MB":Math.round(b/1024)+" KB"};
+  var extOf=function(m){return m==="image/png"?"png":m==="image/webp"?"webp":"jpg"};
+  function showErr(m){err.textContent=m;err.classList.add("show");busy.classList.remove("show")}
+  drop.addEventListener("click",function(){fileInput.click()});
+  fileInput.addEventListener("change",function(e){if(e.target.files[0])load(e.target.files[0])});
+  ["dragenter","dragover"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add("drag")})});
+  ["dragleave","drop"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove("drag")})});
+  drop.addEventListener("drop",function(e){var f=e.dataTransfer.files[0];if(f)load(f)});
+  function upd(){var png=fmtIn.value==="image/png";qField.style.display=png?"none":"";qv.textContent=qIn.value+"%"}
+  fmtIn.addEventListener("change",function(){upd();render()});qIn.addEventListener("input",function(){qv.textContent=qIn.value+"%";render()});upd();
+  function load(file){
+    if(file.type.indexOf("image/")!==0){showErr("이미지 파일만 올릴 수 있어요.");return}
+    origName=(file.name.replace(/\.[^.]+$/,"")||"image");origType=(file.type.split("/")[1]||"?").toUpperCase();
+    var u=URL.createObjectURL(file);img=new Image();img.onload=function(){URL.revokeObjectURL(u);render()};img.onerror=function(){showErr("이미지를 읽지 못했어요.")};img.src=u}
+  function render(){
+    if(!img)return;err.classList.remove("show");busy.classList.add("show");
+    var mime=fmtIn.value,c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;var ctx=c.getContext("2d");
+    if(mime==="image/jpeg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height)}
+    ctx.drawImage(img,0,0);
+    var q=mime==="image/png"?undefined:parseInt(qIn.value)/100;
+    c.toBlob(function(blob){busy.classList.remove("show");if(!blob){showErr("변환 실패");return}
+      if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(blob);preview.src=lastUrl;
+      var ext=extOf(mime);dl.href=lastUrl;dl.download=origName+"."+ext;
+      sFrom.textContent=origType;sTo.textContent=ext.toUpperCase();sSize.textContent=fmtKB(blob.size);
+      result.classList.add("show")},mime,q)}
+})();
+</script>
+</body>
+</html>
