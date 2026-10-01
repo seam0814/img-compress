@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>만 나이 계산기 — 생년월일로 만·연·세는나이 (무료)</title>
+<meta name="description" content="생년월일을 넣으면 만 나이, 연 나이, 세는 나이를 바로 계산합니다. 특정 날짜 기준도 가능. 무료·회원가입 없이 브라우저에서 바로.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/age/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>만 나이 계산기</h1>
+  <p class="sub">생년월일을 넣으면 만 나이·연 나이·세는 나이를 바로 계산해요. 입력값은 서버로 전송되지 않습니다.</p>
+  <div class="tool">
+    <label>생년월일 (양력)</label>
+    <div class="controls" style="margin-top:4px">
+      <div class="field"><input id="y" type="number" inputmode="numeric" placeholder="예) 1990" min="1900" max="2100"></div>
+      <div class="field"><input id="m" type="number" inputmode="numeric" placeholder="월" min="1" max="12"></div>
+      <div class="field"><input id="d" type="number" inputmode="numeric" placeholder="일" min="1" max="31"></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label for="base">기준일 (기본: 오늘)</label><input id="base" type="date"></div>
+    <button class="btn" id="go">나이 계산</button>
+    <div class="err" id="err"></div>
+    <div class="result" id="result">
+      <div class="stats">
+        <div class="stat win"><b id="man">–</b><span>만 나이</span></div>
+        <div class="stat"><b id="yeon">–</b><span>연 나이</span></div>
+        <div class="stat"><b id="se">–</b><span>세는 나이</span></div>
+      </div>
+      <p class="note" id="meta"></p>
+    </div>
+  </div>
+  <div class="copy">
+    <h2>나이 계산 기준</h2>
+    <p><b>만 나이</b>는 태어난 날을 기준으로 생일이 지날 때마다 1살씩 느는, 법적·공식 나이예요. <b>연 나이</b>는 '올해 연도 − 태어난 연도', <b>세는 나이</b>는 거기에 +1(옛 한국식)입니다. 2023년부터 한국도 공식적으로 만 나이로 통일됐어요.</p>
+    <details><summary>기준일을 바꿀 수 있나요?</summary><p>네. 기준일을 특정 날짜로 바꾸면 그 날 기준 나이를 계산합니다(예: 입사일·시험일 기준).</p></details>
+    <details><summary>음력 생일도 되나요?</summary><p>이 계산기는 양력 기준입니다. 음력 생일이면 양력으로 환산한 날짜를 넣어주세요.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var y=$("#y"),m=$("#m"),d=$("#d"),base=$("#base"),err=$("#err"),result=$("#result");
+  y.value=store.get("by","");m.value=store.get("bm","");d.value=store.get("bd","");
+  y.addEventListener("input",function(){if(y.value.length>=4)m.focus()});
+  m.addEventListener("input",function(){if(m.value.length>=2||+m.value>1)d.focus()});
+  function showErr(t){err.textContent=t;err.classList.add("show")}
+  $("#go").addEventListener("click",function(){
+    err.classList.remove("show");result.classList.remove("show");
+    var Y=+y.value,M=+m.value,D=+d.value;
+    if(!(Y>=1900&&M>=1&&M<=12&&D>=1&&D<=31)){showErr("생년월일을 바르게 입력하세요.");return}
+    store.set("by",y.value);store.set("bm",m.value);store.set("bd",d.value);track("age_calc");
+    var b=new Date(Y,M-1,D), ref=base.value?new Date(base.value):new Date();
+    if(isNaN(b.getTime())){showErr("날짜를 확인하세요.");return}
+    var man=ref.getFullYear()-Y;
+    var passed=(ref.getMonth()+1>M)||((ref.getMonth()+1===M)&&(ref.getDate()>=D));
+    if(!passed)man--;
+    $("#man").textContent=man+"세";
+    $("#yeon").textContent=(ref.getFullYear()-Y)+"세";
+    $("#se").textContent=(ref.getFullYear()-Y+1)+"세";
+    var refMid=new Date(ref.getFullYear(),ref.getMonth(),ref.getDate());
+    var ny=new Date(ref.getFullYear(),M-1,D);if(ny<refMid)ny=new Date(ref.getFullYear()+1,M-1,D);
+    var dday=Math.round((ny-refMid)/86400000);
+    $("#meta").textContent="다음 생일까지 "+(dday===0?"오늘! 🎂":"D-"+dday)+" · 기준일 "+(base.value||"오늘");
+    result.classList.add("show");
+  });
+})();
+</script>
+</body>
+</html>

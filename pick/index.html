@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>랜덤 뽑기·추첨기 — 이름 넣고 무작위 추첨 (무료)</title>
+<meta name="description" content="이름이나 항목을 넣으면 무작위로 추첨합니다. 이벤트 당첨자, 발표 순서, 청소 당번 정하기에 딱. 무료·회원가입 없이 브라우저에서.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/pick/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>랜덤 뽑기 · 추첨기</h1>
+  <p class="sub">이름/항목을 한 줄에 하나씩 넣고 무작위로 뽑으세요. 이벤트 당첨·발표순서·당번 정하기에 딱.</p>
+  <div class="tool">
+    <label for="items">항목 (한 줄에 하나)</label>
+    <textarea id="items" placeholder="김철수&#10;이영희&#10;박민수&#10;…" style="min-height:140px"></textarea>
+    <div class="controls">
+      <div class="field"><label for="n">뽑을 개수</label><input id="n" type="number" inputmode="numeric" value="1" min="1"></div>
+      <div class="field"><label style="display:flex;align-items:center;gap:8px;color:var(--fg)"><input type="checkbox" id="uniq" checked style="width:auto"> 중복 없이</label></div>
+    </div>
+    <button class="btn" id="go">🎲 추첨!</button>
+    <div class="err" id="err"></div>
+    <div class="result" id="result">
+      <div class="reading" id="picked" style="text-align:center;font-size:1.15rem"></div>
+      <button class="btn sec" id="again">다시 뽑기</button>
+    </div>
+  </div>
+  <div class="copy">
+    <h2>사용법</h2>
+    <p>이름이나 항목을 한 줄에 하나씩 입력하고 '추첨!'을 누르면 무작위로 뽑아요. '중복 없이'를 켜면 같은 항목이 두 번 안 나옵니다. 모든 추첨은 브라우저에서 처리되어 공정하고, 입력값은 전송되지 않습니다.</p>
+    <details><summary>조작되지 않나요?</summary><p>브라우저의 난수(Math.random)로 그 자리에서 뽑습니다. 서버로 보내지 않아 외부 개입이 없습니다.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var items=$("#items"),n=$("#n"),uniq=$("#uniq"),err=$("#err"),result=$("#result"),picked=$("#picked");
+  items.value=store.get("pick_items","");
+  function showErr(t){err.textContent=t;err.classList.add("show")}
+  function draw(){
+    err.classList.remove("show");result.classList.remove("show");
+    var list=items.value.split("\n").map(function(s){return s.trim()}).filter(Boolean);
+    if(!list.length){showErr("항목을 한 줄에 하나씩 입력하세요.");return}
+    store.set("pick_items",items.value);
+    var k=Math.max(1,parseInt(n.value)||1),pool=list.slice(),out=[];
+    if(uniq.checked){
+      k=Math.min(k,pool.length);
+      for(var i=0;i<k;i++){var idx=Math.floor(Math.random()*pool.length);out.push(pool.splice(idx,1)[0])}
+    }else{for(var j=0;j<k;j++)out.push(pool[Math.floor(Math.random()*pool.length)])}
+    track("pick");
+    picked.innerHTML=out.map(function(x,i){return '<div>'+(out.length>1?(i+1)+'. ':'🎉 ')+x+'</div>'}).join("");
+    result.classList.add("show");
+  }
+  $("#go").addEventListener("click",draw);
+  $("#again").addEventListener("click",draw);
+})();
+</script>
+</body>
+</html>

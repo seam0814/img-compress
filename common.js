@@ -33,7 +33,9 @@
     {path:"convert/",    ic:"🔄", title:"이미지 형식 변환",   desc:"PNG · JPG · WebP",         cat:"이미지"},
     {path:"img-to-pdf/", ic:"📄", title:"이미지 → PDF",       desc:"여러 장을 PDF 한 개로",   cat:"PDF", pop:true},
     {path:"word-count/", ic:"🔢", title:"글자 수 세기",       desc:"글자·단어·공백 카운트",   cat:"텍스트"},
-    {path:"qr/",         ic:"▦",  title:"QR 코드 생성",       desc:"링크·텍스트 → QR 이미지", cat:"개발"}
+    {path:"qr/",         ic:"▦",  title:"QR 코드 생성",       desc:"링크·텍스트 → QR 이미지", cat:"개발"},
+    {path:"age/",        ic:"🎂", title:"만 나이 계산기",     desc:"생년월일로 만·연·세는나이", cat:"생활", pop:true},
+    {path:"pick/",       ic:"🎲", title:"랜덤 뽑기·추첨",     desc:"이름 넣고 무작위 추첨",   cat:"생활"}
   ];
   window.TOOLS = TOOLS;
   window.SITE_NAME = "만들다 <span>툴</span>"; // 임시 브랜드(도메인 정할 때 교체)
