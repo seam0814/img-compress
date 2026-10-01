@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D-day 계산기 — 목표일까지 며칠 남았나 (무료)</title>
+<meta name="description" content="목표 날짜를 넣으면 오늘부터 며칠 남았는지(D-day), 몇 주·무슨 요일인지 바로 계산합니다. 시험·기념일·전역일 D-day. 무료·회원가입 없이.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/dday/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>D-day 계산기</h1>
+  <p class="sub">목표 날짜까지 며칠 남았는지 바로 계산해요. 시험·기념일·전역일 등.</p>
+  <div class="tool">
+    <div class="field"><label for="target">목표 날짜</label><input id="target" type="date"></div>
+    <div class="field" style="margin-top:12px"><label for="base">기준일 (기본: 오늘)</label><input id="base" type="date"></div>
+    <button class="btn" id="go">D-day 계산</button>
+    <div class="err" id="err"></div>
+    <div class="result" id="result">
+      <div class="stats">
+        <div class="stat win"><b id="dday">–</b><span>D-day</span></div>
+        <div class="stat"><b id="days">–</b><span>총 일수</span></div>
+        <div class="stat"><b id="dow">–</b><span>요일</span></div>
+      </div>
+      <p class="note" id="meta"></p>
+    </div>
+  </div>
+  <div class="copy">
+    <h2>D-day 읽는 법</h2>
+    <p><b>D-30</b> = 목표일이 30일 남음, <b>D-DAY</b> = 바로 그날, <b>D+100</b> = 목표일이 100일 지남(예: 만난 지 100일). 기준일을 바꾸면 그 날 기준으로 계산돼요.</p>
+    <details><summary>'만난 지 100일' 같은 것도 되나요?</summary><p>네. 목표 날짜에 시작일(처음 만난 날 등)을 넣으면 D+숫자로 며칠째인지 나와요.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var target=$("#target"),base=$("#base"),err=$("#err"),result=$("#result");
+  var DOW=["일","월","화","수","목","금","토"];
+  function showErr(t){err.textContent=t;err.classList.add("show")}
+  $("#go").addEventListener("click",function(){
+    err.classList.remove("show");result.classList.remove("show");
+    if(!target.value){showErr("목표 날짜를 선택하세요.");return}
+    track("dday_calc");
+    var t=new Date(target.value+"T00:00:00");
+    var ref=base.value?new Date(base.value+"T00:00:00"):(function(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())})();
+    var diff=Math.round((t-ref)/86400000);
+    var label=diff>0?("D-"+diff):diff<0?("D+"+(-diff)):"D-DAY";
+    $("#dday").textContent=label;
+    $("#days").textContent=Math.abs(diff)+"일";
+    $("#dow").textContent=DOW[t.getDay()]+"요일";
+    var wk=Math.floor(Math.abs(diff)/7),rem=Math.abs(diff)%7;
+    $("#meta").textContent=(diff>0?"목표일까지 ":diff<0?"목표일에서 ":"")+(diff!==0?(wk+"주 "+rem+"일":"")+" · ":"")+"목표일 "+target.value+" ("+DOW[t.getDay()]+")";
+    result.classList.add("show");
+  });
+})();
+</script>
+</body>
+</html>

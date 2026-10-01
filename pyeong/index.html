@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>평 ↔ 제곱미터(㎡) 변환기 — 평수 계산 (무료)</title>
+<meta name="description" content="평과 제곱미터(㎡)를 양방향으로 바로 변환합니다. 아파트·부동산 평수 계산에 딱. 무료·회원가입 없이 브라우저에서.">
+<link rel="canonical" href="https://seam0814.github.io/img-compress/pyeong/">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>평 ↔ ㎡ 변환기</h1>
+  <p class="sub">평과 제곱미터를 양방향으로 바로 변환해요. 한쪽에 입력하면 자동 계산.</p>
+  <div class="tool">
+    <div class="row2">
+      <div class="field"><label for="py">평</label><input id="py" type="number" inputmode="decimal" placeholder="예) 34"></div>
+      <div class="field"><label for="m2">제곱미터 (㎡)</label><input id="m2" type="number" inputmode="decimal" placeholder="예) 112.4"></div>
+    </div>
+    <div class="presets" id="presets" style="margin-top:12px">
+      <button data-py="24">24평</button><button data-py="34">34평</button><button data-py="43">43평</button><button data-py="59">59㎡형</button>
+    </div>
+    <p class="note" id="meta" style="text-align:left;margin-top:14px"></p>
+  </div>
+  <div class="copy">
+    <h2>평수 변환 공식</h2>
+    <p><b>1평 = 3.3058㎡</b> (정확히는 400/121㎡). 반대로 <b>1㎡ = 0.3025평</b>이에요. 아파트 '분양면적 ○○㎡'을 평으로 보고 싶을 때 쓰면 됩니다. 참고로 '59㎡형', '84㎡형'이 각각 흔히 말하는 24평·34평대예요.</p>
+    <details><summary>전용면적·공급면적 차이는요?</summary><p>이 변환기는 숫자 단위만 바꿔줘요. '전용 84㎡'인지 '공급 112㎡'인지는 분양 정보를 확인하세요(같은 집도 기준에 따라 평수가 달라 보입니다).</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var py=$("#py"),m2=$("#m2"),meta=$("#meta"),R=3.305785;
+  function fromPy(){var v=parseFloat(py.value);if(isNaN(v)){m2.value="";meta.textContent="";return}
+    m2.value=(v*R).toFixed(2);info(v,v*R)}
+  function fromM2(){var v=parseFloat(m2.value);if(isNaN(v)){py.value="";meta.textContent="";return}
+    py.value=(v/R).toFixed(2);info(v/R,v)}
+  function info(p,m){meta.innerHTML="<b>"+p.toFixed(2)+"평</b> = <b>"+m.toFixed(2)+"㎡</b> · 1평 = 3.3058㎡";track("pyeong")}
+  py.addEventListener("input",fromPy);m2.addEventListener("input",fromM2);
+  $("#presets").addEventListener("click",function(e){var v=e.target.getAttribute("data-py");if(v){py.value=v;fromPy()}});
+})();
+</script>
+</body>
+</html>

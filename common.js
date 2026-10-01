@@ -35,7 +35,9 @@
     {path:"word-count/", ic:"🔢", title:"글자 수 세기",       desc:"글자·단어·공백 카운트",   cat:"텍스트"},
     {path:"qr/",         ic:"▦",  title:"QR 코드 생성",       desc:"링크·텍스트 → QR 이미지", cat:"개발"},
     {path:"age/",        ic:"🎂", title:"만 나이 계산기",     desc:"생년월일로 만·연·세는나이", cat:"생활", pop:true},
-    {path:"pick/",       ic:"🎲", title:"랜덤 뽑기·추첨",     desc:"이름 넣고 무작위 추첨",   cat:"생활"}
+    {path:"pick/",       ic:"🎲", title:"랜덤 뽑기·추첨",     desc:"이름 넣고 무작위 추첨",   cat:"생활"},
+    {path:"dday/",       ic:"📅", title:"D-day 계산기",       desc:"목표일까지 며칠 남았나",   cat:"생활", pop:true},
+    {path:"pyeong/",     ic:"📏", title:"평↔㎡ 변환기",       desc:"평수·제곱미터 변환",      cat:"생활"}
   ];
   window.TOOLS = TOOLS;
   window.SITE_NAME = "만들다 <span>툴</span>"; // 임시 브랜드(도메인 정할 때 교체)
